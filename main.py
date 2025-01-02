@@ -2,26 +2,13 @@ import faiss
 import numpy as np
 import pandas as pd
 import tqdm
-from rebotics_sdk.rcdb import Unpacker
+import os
 
-rcdb_path = '/home/victoruchaev/Documents/data/maksim/wmdp2_fvs/fvs.zip'
+rcdb_path = '/home/Documents/data/fvs.zip'
 
-
-with Unpacker(rcdb_path) as unpacker:
-    features_count = unpacker.get_metadata().count
-
-    features = np.empty(
-        (features_count, 512), dtype=np.float32
-    )
-    labels_np = np.empty(features_count, dtype=object)
-    uuids_np = np.empty(features_count, dtype=object)
-
-    for i, entry in enumerate(
-        tqdm.tqdm(unpacker.entries(), total=features_count, desc='Unpacking classification database')
-    ):
-        labels_np[i] = entry.label
-        uuids_np[i] = entry.uuid
-        features[i] = entry.feature_vector
+features = np.loadtxt(os.path.join(rcdb_path, f'features.txt'), delimiter=",", dtype=np.float32)
+labels_np = np.genfromtxt(os.path.join(rcdb_path, f'label.txt'), dtype='str')
+uuids_np = np.genfromtxt(os.path.join(rcdb_path, f'uuid_1.txt'), dtype='str')
 
 df = pd.DataFrame({'upc': labels_np, 'uuid': uuids_np})
 df['score'] = 0.0
